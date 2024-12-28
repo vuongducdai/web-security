@@ -45,7 +45,7 @@ app.post('/login', async (req, res) => {
   if (user) {
     res.cookie('username', username, {
       httpOnly: true,
-      secure: true,
+      secure: process.env.NODE_ENV === 'production',
     });
     res.redirect('/profile');
   } else {
