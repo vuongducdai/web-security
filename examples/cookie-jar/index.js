@@ -43,7 +43,9 @@ app.post('/login', async (req, res) => {
   );
 
   if (user) {
-    res.cookie('username', username);
+    res.cookie('username', username, {
+      httpOnly: true,
+    });
     res.redirect('/profile');
   } else {
     res.status(403).redirect('/login?error=Invalid login credentials.');
