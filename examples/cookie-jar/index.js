@@ -5,11 +5,12 @@ import cookieParser from 'cookie-parser';
 import db from './database.js';
 
 const app = createServer({ cookies: false });
-app.use(cookieParser());
+const cookieSecret = 'dai-secret'
+app.use(cookieParser(cookieSecret));
 
 app.get('/', (req, res) => {
   if (!req.cookies) res.send('Cookies are disabled.');
-  if (req.cookies.username) {
+  if (req.signedCookies.username) {
     res.redirect('/profile');
   } else {
     res.redirect('/login');
@@ -19,7 +20,7 @@ app.get('/', (req, res) => {
 app.get('/login', async (req, res) => {
   const loginPage = await readFile('./pages/login.html', 'utf-8');
 
-  if (req.cookies.username) {
+  if (req.signedCookies.username) {
     res.redirect('/profile');
   }
 
@@ -46,6 +47,7 @@ app.post('/login', async (req, res) => {
     res.cookie('username', username, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
+      signed: true,
     });
     res.redirect('/profile');
   } else {
@@ -62,7 +64,7 @@ app.post('/logout', (_, res) => {
 app.get('/profile', async (req, res) => {
   res.locals.title = 'Profile';
 
-  const username = req.cookies.username;
+  const username = req.signedCookies.username;
 
   if (!username) {
     return res.redirect('/login?error=Please login to view your profile.');
